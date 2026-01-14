@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image & Description Memory Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1e1e2f;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: white;
+    }
+
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 120px);
+      gap: 12px;
+    }
+
+    .card {
+      width: 120px;
+      height: 120px;
+      background: #444;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 14px;
+      padding: 6px;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    .card img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 6px;
+    }
+
+    .card.flipped {
+      background: #fff;
+      color: #000;
+      cursor: default;
+    }
+
+    .card.matched {
+      background: #4caf50;
+      color: #fff;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-board" id="gameBoard"></div>
+
+  <script>
+    const pairs = [
+      {
+        id: 1,
+        image: "https://via.placeholder.com/100?text=Cat",
+        text: "A small domesticated animal that says meow"
+      },
+      {
+        id: 2,
+        image: "https://via.placeholder.com/100?text=Apple",
+        text: "A red or green fruit often eaten fresh"
+      },
+      {
+        id: 3,
+        image: "https://via.placeholder.com/100?text=Car",
+        text: "A vehicle used for road transportation"
+      },
+      {
+        id: 4,
+        image: "https://via.placeholder.com/100?text=Sun",
+        text: "The star at the center of our solar system"
+      }
+    ];
+
+    // Create card data (image card + text card for each pair)
+    const cards = [];
+
+    pairs.forEach(pair => {
+      cards.push({ id: pair.id, type: "image", content: pair.image });
+      cards.push({ id: pair.id, type: "text", content: pair.text });
+    });
+
+    // Shuffle cards
+    cards.sort(() => Math.random() - 0.5);
+
+    const gameBoard = document.getElementById('gameBoard');
+    let firstCard = null;
+    let lockBoard = false;
+
+    cards.forEach(data => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.id = data.id;
+      card.dataset.type = data.type;
+
+      card.addEventListener('click', () => {
+        if (lockBoard || card.classList.contains('flipped')) return;
+
+        card.classList.add('flipped');
+
+        if (data.type === "image") {
+          const img = document.createElement('img');
+          img.src = data.content;
+          card.appendChild(img);
+        } else {
+          card.textContent = data.content;
+        }
+
+        if (!firstCard) {
+          firstCard = card;
+        } else {
+          if (
+            firstCard.dataset.id === card.dataset.id &&
+            firstCard.dataset.type !== card.dataset.type
+          ) {
+            firstCard.classList.add('matched');
+            card.classList.add('matched');
+            firstCard = null;
+          } else {
+            lockBoard = true;
+            setTimeout(() => {
+              firstCard.innerHTML = "";
+              card.innerHTML = "";
+              firstCard.classList.remove('flipped');
+              card.classList.remove('flipped');
+              firstCard = null;
+              lockBoard = false;
+            }, 900);
+          }
+        }
+      });
+
+      gameBoard.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>
